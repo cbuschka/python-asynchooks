@@ -34,20 +34,20 @@ class TaskFactory(object):
 
     def __call__(self, loop, coro, *args, **kwargs):
         async def wrapper():
-            task = asyncio.tasks.Task.current_task(loop)
-            _notify_listeners(_start_listeners, task)
+            current_task = asyncio.current_task(loop)
+            _notify_listeners(_start_listeners, current_task)
             try:
                 result = await coro
                 return result
             finally:
-                _notify_listeners(_finish_listeners, task)
+                _notify_listeners(_finish_listeners, current_task)
 
-        parent_task = asyncio.tasks.Task.current_task(loop)
+        parent_task = asyncio.current_task(loop)
         if self.orig_task_factory:
             task = self.orig_task_factory(loop, wrapper, *args, **kwargs)
         else:
             task = asyncio.tasks.Task(wrapper(), *args, loop=loop, **kwargs)
-        _notify_listeners(_create_listeners, task, parent_task)
+        _notify_listeners(_create_listeners, task, parent_task=parent_task)
 
         return task
 

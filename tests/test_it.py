@@ -9,7 +9,9 @@ class ItTest(unittest.TestCase):
         loop = asyncio.new_event_loop()
         asynchooks.install(loop=loop)
         asynchooks.register(
-            create_listener=lambda t, p: print("created {}, {}".format(t.get_name(), p.get_name() if p else None)),
+            create_listener=lambda t, **p: print(
+                "created {}, {}".format(t.get_name(),
+                                        p["parent_task"].get_name() if p.get("parent_task", None) else None)),
             start_listener=lambda t: print("started {}".format(t.get_name())),
             finish_listener=lambda t: print("finished {}".format(t.get_name())))
 
